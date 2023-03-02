@@ -12,6 +12,11 @@ class TiendaSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $tiendas = \App\Models\Tienda::factory()->count(10)->create();
+        $productos = \App\Models\Producto::factory()->count(10)->create();
+
+        foreach ($tiendas as $tienda) {
+            $tienda->productos()->attach($productos->random(5));
+        }
     }
 }

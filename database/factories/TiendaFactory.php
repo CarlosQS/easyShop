@@ -17,7 +17,7 @@ class TiendaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->name,
         ];
     }
 }
