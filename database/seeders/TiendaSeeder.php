@@ -16,7 +16,7 @@ class TiendaSeeder extends Seeder
         $productos = \App\Models\Producto::factory()->count(10)->create();
 
         foreach ($tiendas as $tienda) {
-            $tienda->productos()->attach($productos->random(5));
+            $tienda->productos()->attach($productos->random(5)->pluck('id')->toArray(), ['cantidad' => rand(1, 10)]);
         }
     }
 }
