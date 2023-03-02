@@ -30,6 +30,10 @@ route::get('/productos', function () {
     return \App\Models\Producto::all();
 });
 
+
+// API REST EXAMPLE:
+// POST http://127.0.0.1:8000/api/tiendas/?nombre=NewShop&productos=[{"id":1,"cantidad":4},{"id":2,"cantidad":2},{"id":3,"cantidad":5}]
+
 Route::post('/tiendas', function (Request $request) {
     $rules = [
         'nombre' => 'required',
