@@ -33,7 +33,6 @@ route::get('/productos', function () {
 
 // API REST EXAMPLE:
 // POST http://127.0.0.1:8000/api/tiendas/?nombre=NewShop&productos=[{"id":1,"cantidad":4},{"id":2,"cantidad":2},{"id":3,"cantidad":5}]
-
 Route::post('/tiendas', function (Request $request) {
     $rules = [
         'nombre' => 'required',
@@ -75,5 +74,41 @@ Route::post('/tiendas', function (Request $request) {
     return response()->json([
         'message' => 'Tienda creada con éxito',
         'tienda' => $tienda->load('productos')->toJson(JSON_PRETTY_PRINT)
+    ], 201);
+});
+
+// API REST EXAMPLE:
+// PUT http://127.0.0.1:8000/api/tiendas/15/?nombre=editedShop
+Route::put('/tiendas/{id}', function (Request $request, $id) {
+    $rules = [
+        'nombre' => 'required',
+    ];
+
+    $messages = [
+        'nombre.required' => 'El nombre de la tienda es obligatorio',
+    ];
+
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $messages);
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Error al editar la tienda',
+            'errors' => $validator->errors()
+        ], 400);
+    }
+
+    $tienda = \App\Models\Tienda::find($id);
+    if($tienda == null) {
+        return response()->json([
+            'message' => 'Error al editar la tienda',
+            'errors' => 'No existe la tienda con id ' . $id
+        ], 400);
+    }
+
+    $tienda->nombre = $request->nombre;
+    $tienda->save();
+
+    return response()->json([
+        'message' => 'Tienda editada con éxito',
+        'tienda' => $tienda->toJson(JSON_PRETTY_PRINT)
     ], 201);
 });
