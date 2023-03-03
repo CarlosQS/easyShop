@@ -92,3 +92,20 @@ Ejemplo de solicitud:
 ```bash
 DELETE /api/tiendas/15
 ```
+
+### Vender productos de una tienda
+```bash
+POST /api/tiendas/{idTienda}/productos/{idProducto}
+```
+Vende productos de la tienda correspondiente al ID proporcionado y del producto con la ID proporcionada, también se debe especificar la cantidad a vender. Devuelve un mensaje de éxito en formato JSON.
+
+Ejemplo de solicitud:
+
+```bash
+POST /api/tiendas/10/productos/1
+Content-Type: application/json
+
+{
+    "cantidad": "2"
+}
+```
