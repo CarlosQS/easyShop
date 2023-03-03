@@ -19,11 +19,36 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/tiendas', function () {
-    return \App\Models\Tienda::all()->load('productos')->toJson(JSON_PRETTY_PRINT);;
+    return \App\Models\Tienda::all()->load('productos')->toJson(JSON_PRETTY_PRINT);
 });
 
 Route::get('/tiendas/{id}', function ($id) {
-    return \App\Models\Tienda::find($id)->load('productos')->toJson(JSON_PRETTY_PRINT);;
+    $rules = [
+        'id' => 'required|integer',
+    ];
+
+    $messages = [
+        'id.required' => 'El id de la tienda es obligatorio',
+        'id.integer' => 'El id de la tienda debe ser un número entero',
+    ];
+
+    $validator = \Illuminate\Support\Facades\Validator::make(['id' => $id], $rules, $messages);
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Error al obtener la tienda',
+            'errors' => $validator->errors()
+        ], 400);
+    }
+
+    $tienda = \App\Models\Tienda::find($id);
+    if($tienda == null) {
+        return response()->json([
+            'message' => 'Error al obtener la tienda',
+            'errors' => 'No existe la tienda con id ' . $id
+        ], 400);
+    }
+
+    return $tienda->load('productos')->toJson(JSON_PRETTY_PRINT);
 });
 
 route::get('/productos', function () {
@@ -110,5 +135,41 @@ Route::put('/tiendas/{id}', function (Request $request, $id) {
     return response()->json([
         'message' => 'Tienda editada con éxito',
         'tienda' => $tienda->toJson(JSON_PRETTY_PRINT)
+    ], 201);
+});
+
+// API REST EXAMPLE:
+// DELETE http://127.0.0.1:8000/api/tiendas/15
+Route::delete('/tiendas/{id}', function ($id) {
+    $rules = [
+        'id' => 'required|integer',
+    ];
+
+    $messages = [
+        'id.required' => 'El id de la tienda es obligatorio',
+        'id.integer' => 'El id de la tienda debe ser un número entero',
+    ];
+
+    $validator = \Illuminate\Support\Facades\Validator::make(['id' => $id], $rules, $messages);
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Error al eliminar la tienda',
+            'errors' => $validator->errors()
+        ], 400);
+    }
+
+    $tienda = \App\Models\Tienda::find($id);
+    if($tienda == null) {
+        return response()->json([
+            'message' => 'Error al eliminar la tienda',
+            'errors' => 'No existe la tienda con id ' . $id
+        ], 400);
+    }
+
+    $tienda->productos()->detach();
+    $tienda->delete();
+
+    return response()->json([
+        'message' => 'Tienda eliminada con éxito',
     ], 201);
 });
