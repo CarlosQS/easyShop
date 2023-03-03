@@ -45,11 +45,6 @@ Route::get('/tiendas/{id}', function ($id) {
     return $tienda->load('productos')->toJson(JSON_PRETTY_PRINT);
 });
 
-route::get('/productos', function () {
-    return \App\Models\Producto::all();
-});
-
-
 // API REST EXAMPLE:
 // POST http://127.0.0.1:8000/api/tiendas/?nombre=NewShop&productos=[{"id":1,"cantidad":4},{"id":2,"cantidad":2},{"id":3,"cantidad":5}]
 Route::post('/tiendas', function (Request $request) {
@@ -168,7 +163,6 @@ Route::delete('/tiendas/{id}', function ($id) {
     ], 201);
 });
 
-// api rest to sell products
 // API REST EXAMPLE:
 // POST http://127.0.0.1:8000/api/tiendas/10/productos/5?cantidad=1
 Route::post('/tiendas/{idTienda}/productos/{idProducto}', function (Request $request, $idTienda, $idProducto) {
