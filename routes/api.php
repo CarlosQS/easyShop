@@ -173,3 +173,63 @@ Route::delete('/tiendas/{id}', function ($id) {
         'message' => 'Tienda eliminada con éxito',
     ], 201);
 });
+
+// api rest to sell products
+// API REST EXAMPLE:
+// POST http://127.0.0.1:8000/api/tiendas/10/productos/5?cantidad=1
+Route::post('/tiendas/{idTienda}/productos/{idProducto}', function (Request $request, $idTienda, $idProducto) {
+    $rules = [
+        'cantidad' => 'required|integer',
+    ];
+
+    $messages = [
+        'cantidad.required' => 'La cantidad es obligatoria',
+        'cantidad.integer' => 'La cantidad debe ser un número entero',
+    ];
+
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $messages);
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Error al vender el producto',
+            'errors' => $validator->errors()
+        ], 400);
+    }
+
+    $tienda = \App\Models\Tienda::find($idTienda);
+    if($tienda == null) {
+        return response()->json([
+            'message' => 'Error al vender el producto',
+            'errors' => 'No existe la tienda con id ' . $idTienda
+        ], 400);
+    }
+
+    $producto = \App\Models\Producto::find($idProducto);
+    if($producto == null) {
+        return response()->json([
+            'message' => 'Error al vender el producto',
+            'errors' => 'No existe el producto con id ' . $idProducto
+        ], 400);
+    }
+
+    $cantidad = $request->cantidad;
+    $cantidadActual = $tienda->productos()->where('producto_id', $idProducto)->first()->pivot->cantidad;
+    if($cantidad > $cantidadActual) {
+        return response()->json([
+            'message' => 'Error al vender el producto',
+            'errors' => 'No hay suficientes productos en la tienda'
+        ], 400);
+    }
+
+    $tienda->productos()->updateExistingPivot($idProducto, ['cantidad' => $cantidadActual - $cantidad]);
+
+    $message = 'Producto vendido con éxito';
+    if ($tienda->productos()->where('producto_id', $idProducto)->first()->pivot->cantidad < 3) {
+        $message .= " ¡Cuidado! Quedan pocos productos en la tienda";
+    }
+
+    return response()->json([
+        'message' => $message,
+        'tienda' => $tienda->load('productos')->toJson(JSON_PRETTY_PRINT),
+        'stock' => $tienda->productos()->where('producto_id', $idProducto)->first()->pivot->cantidad,
+    ], 201);
+});
